@@ -30,13 +30,7 @@ def dollar_evro(bot,update):
         if id_v == id_evro:
             rub_evro = line.find('Value').text
     today = datetime.date.today()
-    rub_dollar = "$ = " + str(rub_dollar)
-    rub_evro = "€ = " + str(rub_evro)
-    date = "Курсы валют на: " + str(today.strftime("%A, %d %B, %Y"))
-    bot.sendMessage(update.message.chat_id, date)
-    bot.sendMessage(update.message.chat_id, rub_dollar)
-    bot.sendMessage(update.message.chat_id, rub_evro)
-
+    bot.sendMessage(update.message.chat_id, text="Курс на {}\n$ = {}\n€ = {}".format(today,rub_dollar,rub_evro))
 
 #обработка ошибок
 def show_error(bot,update, error):
@@ -47,15 +41,15 @@ def talk_to_me(bot,update):
     print('Пришло сообщение: {}'.format(update.message.text))
     bot.sendMessage(update.message.chat_id, get_answer(update.message.text,answers))
 
-answers = {"привет":"Привет!",
-           "здарова":"здоровее видали",
-           "как дела":"Нормально, не жалуюсь. Ты как?",
-           "пока":"Ты это, заходи, если чё",
-           "нормально":"Мой дедушка сказал бы тебе, что надо всегда говорить ""Хорошо""",
-           "плохо":"У кого-то ещё хуже, держись",
-           "хорошо":"Красавчег",
-           "какой смысл жизни?":"ты далек от его понимания, если спрашиваешь у меня ;)",
-           "купи слона":"купилка не выросла :("
+answers = {"Привет":"Привет!",
+           "Здарова":"здоровее видали",
+           "Как дела":"Нормально, не жалуюсь. Ты как?",
+           "Пока":"Ты это, заходи, если чё",
+           "Нормально":"Мой дедушка сказал бы тебе, что надо всегда говорить ""Хорошо""",
+           "Плохо":"У кого-то ещё хуже, держись",
+           "Хорошо":"Красавчег",
+           "Какой смысл жизни?":"Ты далек от его понимания, если спрашиваешь у меня ;)",
+           "Купи слона":"Купилка не выросла :("
 
            }
 
