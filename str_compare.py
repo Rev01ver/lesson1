@@ -1,7 +1,7 @@
 def str_compare(str1,str2):
     if str2 == "learn":
         a=3
-        return (a=3)
+        return a
     elif str1 == str2:
         b=1
         return b
