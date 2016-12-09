@@ -9,7 +9,6 @@ def str_compare(str1,str2):
         c=2
         return c
 
-
 def main():
     string1 = str(input("Введите строку 1:"))
     string2 = str(input("Введите строку 2:"))
