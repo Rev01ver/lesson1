@@ -1,13 +1,10 @@
 def str_compare(str1,str2):
     if str2 == "learn":
-        a=3
-        return a
+        return 3
     elif str1 == str2:
-        b=1
-        return b
+        return 1
     elif str1 != str2  and  len(str1)>len(str2):
-        c=2
-        return c
+        return 2
 
 def main():
     string1 = str(input("Введите строку 1:"))
