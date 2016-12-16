@@ -1,7 +1,13 @@
+# encoding: utf-8
+
 from telegram.ext import Updater,CommandHandler,MessageHandler,Filters
 from xml.etree import ElementTree as ET
 import urllib.request
-import datetime
+from datetime import datetime
+import ephem
+import locale
+import difflib
+
 
 #CommandHandler - класс для обработки команд
 
@@ -14,10 +20,13 @@ def greet_user(bot,update): # update - то, что прислал телегр�
                                                  '- подсчитываем количество слов в предложении /wordcount\n'
                                                  '- калькулятор /calc\n'
                                                  '- словарный калькулятор /wcalc\n'
+                                                 '- рассказать, когда ближайшее полнолуние \n'
+
 
 
 
                     )  #ид чата и текст
+
 
 
 #word calculator
@@ -26,16 +35,34 @@ def wcalc(bot,update):
     print('Пришло сообщение: {}'.format(update.message.text))
     n_str = update.message.text
     n_str = n_str.replace("/wcalc сколько будет ","").replace(" ","")
+    dot = "."
     if "плюс" in n_str:
-            s_str = n_str.split("плюс")
-            result = 0
-            for i in s_str:
-                result += int(numbers.get(i))
-                print(numbers.get(i))
+        s_str = n_str.split("плюс")
+        print(s_str)
+        #for i in s_str:
+         #   result += int(numbers.get(i))
 
+        result = 0
+        for i in s_str:
+            result += int(numbers.get(i))
 
+    elif "минус" in n_str:
+        s_str = n_str.split("минус")
+        result = int(numbers.get(s_str[0]))
+        for i in s_str[1:]:
+            result -= int(numbers.get(i))
 
+    elif "умножитьна" in n_str:
+        s_str = n_str.split("умножитьна")
+        result = int(numbers.get(s_str[0]))
+        for i in s_str[1:]:
+            result *= int(numbers.get(i))
 
+    elif "разделитьна" in n_str:
+        s_str = n_str.split("разделитьна")
+        result = int(numbers.get(s_str[0]))
+        for i in s_str[1:]:
+            result /= int(numbers.get(i))
 
     bot.sendMessage(update.message.chat_id, text="Результат = {}".format(result))
 
@@ -124,37 +151,62 @@ def dollar_evro(bot,update):
             rub_dollar = line.find('Value').text
         if id_v == id_evro:
             rub_evro = line.find('Value').text
-    today = datetime.date.today()
-    bot.sendMessage(update.message.chat_id, text="Курс на {}\n$ = {}\n€ = {}".format(today,rub_dollar,rub_evro))
+
+
+    today = datetime.now()
+    bot.sendMessage(update.message.chat_id, text="Курс на {}\n$ = {}\n€ = {}".format(today.strftime('%d %B %Y'),rub_dollar,rub_evro))
 
 #обработка ошибок
 def show_error(bot,update, error):
     print('Update "{}" caused error "{}"'.format(update,error)) #на место {} подставляются значения из format
 
+
+#moon predict
+def moon_predict(moon_str):
+   return (ephem.next_full_moon(str(moon_str[-1])))
+
+
+
 #отвечаем на сообщения
 def talk_to_me(bot,update):
     print('Пришло сообщение: {}'.format(update.message.text))
-    bot.sendMessage(update.message.chat_id, get_answer(update.message.text,answers))
+    update.message.text = update.message.text.lower()
+    #преобразуем в список без пробелов
+    moon_str = update.message.text.split(" ")
+    #сравниваем два списка
+    # d = difflib.Differ()
+    moon_str[-1] = moon_str[-1].replace("?", "")
+    if moon_str[:-1] == moon_check_list:
+        # print(d.compare(moon_str[:-1],moon_check_list))
+        bot.sendMessage(update.message.chat_id, str(moon_predict(moon_str)))
+    elif moon_str == moon_check_list:
+        bot.sendMessage(update.message.chat_id, "Дату не ввел, красавчик")
+    else:
+        bot.sendMessage(update.message.chat_id, get_answer(update.message.text,answers))
 
 
 
-answers = {"Привет":"Привет!",
-           "Здарова":"здоровее видали",
-           "Как дела":"Нормально, не жалуюсь. Ты как?",
-           "Пока":"Ты это, заходи, если чё",
-           "Нормально":"Мой дедушка сказал бы тебе, что надо всегда говорить ""Хорошо""",
-           "Плохо":"У кого-то ещё хуже, держись",
-           "Хорошо":"Красавчег",
-           "Какой смысл жизни?":"Ты далек от его понимания, если спрашиваешь у меня ;)",
-           "Купи слона":"Купилка не выросла :("
+answers = {"привет":"Привет!",
+           "здарова":"здоровее видали",
+           "как дела":"Нормально, не жалуюсь. Ты как?",
+           "пока":"Ты это, заходи, если чё",
+           "нормально":"Мой дедушка сказал бы тебе, что надо всегда говорить ""Хорошо""",
+           "плохо":"У кого-то ещё хуже, держись",
+           "хорошо":"Красавчег",
+           "какой смысл жизни?":"Ты далек от его понимания, если спрашиваешь у меня ;)",
+           "купи слона":"Купилка не выросла :("
 
            }
+moon_check_list = ['когда', 'ближайшее', 'полнолуние', 'после']
+
 
 def get_answer(question,answers):
     return answers.get(question,"Извини, не понял тебя((. Я только учусь")
 
 #запуск самого бота
 def run_bot ():
+
+    #locale.setlocale(locale.LC_TIME, 'os_RU.UTF-8')
     updater = Updater("323448045:AAHKhwI_4oVHuUjX3R4aELOOlk92TGWhyJY")
     dp = updater.dispatcher #диспетчер, который распределяет информацию
     dp.add_handler(CommandHandler("start",greet_user))   # диспетчер добавь обработчик команд, типа commanhadler и что обрабатывать
