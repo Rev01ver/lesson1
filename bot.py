@@ -21,13 +21,35 @@ def greet_user(bot,update): # update - то, что прислал телегр�
                                                  '- калькулятор /calc\n'
                                                  '- словарный калькулятор /wcalc\n'
                                                  '- рассказать, когда ближайшее полнолуние \n'
+                                                 '- играть в слова /goroda \n'
+
 
 
 
 
                     )  #ид чата и текст
 
-
+#goroda
+def goroda(bot,update):
+    print('Вызван /goroda')
+    print('Пришло сообщение: {}'.format(update.message.text))
+    n_str = update.message.text
+    n_str = n_str.replace("/goroda ", "").replace(" ", "")
+    city_next = ""
+    if n_str in city_list:
+        city_list.remove(n_str)
+        for city in city_list:
+            if n_str.lower()[-1] == city.lower()[0]:
+               city_next = city
+               city_list.remove(city)
+               bot.sendMessage(update.message.chat_id, text="{}, ваш ход".format(city_next))
+               break
+        if city_next == "":
+            bot.sendMessage(update.message.chat_id, text="Не знаю, что придумать, я проиграл :(")
+    else:
+        bot.sendMessage(update.message.chat_id, text="Или такого города не существует или он уже был :)"
+                        )
+city_list = ["Москва","Альметьевск","Абакан","Нижний новгород","Киров","Воркута","Домодедово"]
 
 #word calculator
 def wcalc(bot,update):
@@ -87,7 +109,10 @@ numbers = {"один":1,
 def calc(bot,update):
     print('Вызван /calc')
     print('Пришло сообщение: {}'.format(update.message.text))
-
+    # custom_keyboard = [['top-left', 'top-right'],
+    #                    ['bottom-left', 'bottom-right']]
+    # reply_markup = telegram.ReplyKeyboardMarkup(custom_keyboard)
+    # # bot.sendMessage(chat_id=chat_id, text="Custom Keyboard Test", reply_markup=reply_markup)
     n_str = update.message.text
     n_str = n_str.replace("/calc ","").replace(" ","")
 
@@ -214,7 +239,10 @@ def run_bot ():
     dp.add_handler(CommandHandler("wordcount", wordcount))
     dp.add_handler(CommandHandler("calc", calc))
     dp.add_handler(CommandHandler("wcalc", wcalc))
+    dp.add_handler(CommandHandler("goroda", goroda))
     dp.add_handler(MessageHandler([Filters.text], talk_to_me))
+
+
     dp.add_error_handler(show_error) # обработка ошибок - вызываем функцию, которая отображает ошибки
     updater.start_polling() #жди сообщения от телеграмма
     updater.idle() # работай, пока не остановят - ожидание
